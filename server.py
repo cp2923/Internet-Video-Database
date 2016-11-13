@@ -131,76 +131,60 @@ def index():
 
 
   #
-  # example of a database query
-  #
-  cursor = g.conn.execute("SELECT * FROM users")
-  names = []
-  for result in cursor:
-    names.append(result[0])  # can also be accessed using result[0]
-  cursor.close()
-
-  #
-  # Flask uses Jinja templates, which is an extension to HTML where you can
-  # pass data to a template and dynamically generate HTML based on the data
-  # (you can think of it as simple PHP)
-  # documentation: https://realpython.com/blog/python/primer-on-jinja-templating/
-  #
-  # You can see an example template in templates/index.html
-  #
-  # context are the variables that are passed to the template.
-  # for example, "data" key in the context variable defined below will be 
-  # accessible as a variable in index.html:
-  #
-  #     # will print: [u'grace hopper', u'alan turing', u'ada lovelace']
-  #     <div>{{data}}</div>
-  #     
-  #     # creates a <div> tag for each element in data
-  #     # will print: 
-  #     #
-  #     #   <div>grace hopper</div>
-  #     #   <div>alan turing</div>
-  #     #   <div>ada lovelace</div>
-  #     #
-  #     {% for n in data %}
-  #     <div>{{n}}</div>
-  #     {% endfor %}
-  #
-  context = dict(data = names)
-
-
-  #
   # render_template looks in the templates/ folder for files.
   # for example, the below file reads template/index.html
   #
-  return render_template("index.html", **context)
+  return render_template("index.html")
 
-#
-# This is an example of a different path.  You can see it at
-# 
-#     localhost:8111/another
-#
-# notice that the functio name is another() rather than index()
-# the functions for each app.route needs to have different names
-#
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
+
+@app.route('/login', methods=['POST'])
+def login():
+  return redirect("/videos")
+
+@app.route('/videos')
+def videos():
+  cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("videos.html", **context)
+
+@app.route('/profile')
+def profile():
+  cursor = g.conn.execute("SELECT * FROM users")
+  names = cursor.fetchone()
+  cursor.close()
+  context = dict(data = names)
+  return render_template("profile.html", **context)
+
+@app.route('/changepassword', methods=['GET','POST'])
+def changepassword():
+  error = None
+  email = request.form['email']
+  old_pass = request.form['oldpassword']
+  new_pass = request.form['newpassword']
+  cmd1 = "SELECT password FROM users WHERE email=\'" + email + "\'"
+  pass_db = g.conn.execute(cmd1)
+  if(old_pass == pass_db):
+	#cmd2 = 'UPDATE users SET password = (:newpass) WHERE email=(:email1)'
+	cmd2 = 'UPDATE users SET password =\'' + new_pass + '\' WHERE email=\'' + email + '\''  
+	#g.conn.execute(text(cmd), newpass = new_pass, email1 = email)
+	g.conn.execute(cmd2)  	
+	return redirect('/profile')
+  error = 'Invalid Credentials' 
+  return redirect('/profile')
 
 
 # Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  print name
-  cmd = 'INSERT INTO users(email) VALUES (:email1)';
-  g.conn.execute(text(cmd), email1 = name);
+@app.route('/register', methods=['POST'])
+def register():
+  #name = request.form['name']
+  #print name
+  #cmd = 'INSERT INTO users(email) VALUES (:email1)';
+  #g.conn.execute(text(cmd), email1 = name);
   return redirect('/')
-
-
-@app.route('/login')
-def login():
-    abort(401)
-    this_is_never_executed()
 
 
 if __name__ == "__main__":

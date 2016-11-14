@@ -1,0 +1,40 @@
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>Profile Page</h1>
+
+  <div>
+    <p><div style="font-size: 25pt">{{data.name}}</div></p>
+    <div>{{data.email}}</div>
+  </div>
+
+<p><h2>Change Password</h2></p>
+{%if error%}
+<p class=error><strong>Error:</strong> {{ error }}
+{%endif%}
+<form method="POST" action="/changepassword">
+  <div>
+    <p><div><input type="hidden" name="email" value={{data.email}}></div></p>
+    <p><div>old password<input type="password" name="oldpassword"></div><div>new password<input type="password" name="newpassword"></div></p>
+  </div>
+<input type="submit" value="Confirm">
+</form>
+
+
+
+<p><a href="/createplaylist">Create Playlist</a></p>
+<p><a href="/towatchvideos">To Watch Videos</a></p>
+<p><a href="/watchedvideos">Watched Videos</a></p>
+<p><a href="/myreviews">My reviews</a></p>
+<p><a href="/videos">Go to Video List</a></p>
+</body>
+
+
+</html>

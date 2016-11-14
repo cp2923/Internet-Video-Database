@@ -19,11 +19,15 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 
+app.secret_key = 'super secret key'
 
+login_manager = LoginManager()
+login_manager.init_app(app)
 #
 # The following uses the postgresql test.db -- you can use this for debugging purposes
 # However for the project you will need to connect to your Part 2 database in order to use the
@@ -114,6 +118,27 @@ def teardown_request(exception):
 # see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
+
+def checkdb(email, password):
+    cmd = "SELECT * from users where email = :email and password = :password;"
+    cursor = g.conn.execute(text(cmd), email=email, password=password)
+    res = cursor.fetchone()
+    if res == None:
+        return False
+    else:
+        return True
+
+@login_manager.user_loader
+def user_loader(email):
+    if email not in user_database:
+        return
+
+    print '@user_loader'
+    user = User()
+    user.id = email
+    return user
+
+
 @app.route('/')
 def index():
   """
@@ -137,9 +162,27 @@ def index():
   return render_template("index.html")
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-  return redirect("/videos")
+    if request.method == 'GET':
+        return '''
+               <form action='login' method='POST'>
+                <input type='text' name='email' id='email' placeholder='email'></input>
+                <input type='password' name='pw' id='pw' placeholder='password'></input>
+                <input type='submit' name='submit'></input>
+               </form>
+               '''
+    print "@login"
+    email = request.form['email']
+    password = request.form['pw']
+    if checkdb(email, password):
+        user = User()
+        user.id = email
+        login_user(user)
+        return 'Successful login'
+
+    return 'Bad login'
+
 
 @app.route('/videos')
 def videos():
@@ -160,8 +203,9 @@ def profile():
   return render_template("profile.html", **context)
 
 @app.route('/changepassword', methods=['GET','POST'])
+@login_required
 def changepassword():
-  error = None
+#  error = None
   email = request.form['email']
   old_pass = request.form['oldpassword']
   new_pass = request.form['newpassword']
@@ -171,18 +215,20 @@ def changepassword():
   if(old_pass == pass_db):
 	g.conn.execute('UPDATE users SET password = %s WHERE email= %s',new_pass, email)
 	return redirect('/profile')
-  error = 'Invalid Credentials'
-  return redirect('/profile')
+#  error = 'Invalid Credentials'
+  return  render_template("wrongpw.html")
 
-@app.route('/towatch')
+@app.route('/towatch', methods=['GET','POST'])
 def towatch():
-  email = request.form['email']
-  cursor = conn.execute('SELECT name FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
+  #email = request.form['email']
+  #cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
+
+  cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
   names = []
   for result in cursor:
-    names.append(result)
+    names.append(result)  # can also be accessed using result[0]
   cursor.close()
-  context = dict(data = names)
+  context = dict(cc = names)
   return render_template("towatch.html", **context)
 
 # Example of adding new data to the database

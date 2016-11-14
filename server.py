@@ -29,7 +29,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 # However for the project you will need to connect to your Part 2 database in order to use the
 # data
 #
-# XXX: The URI should be in the format of: 
+# XXX: The URI should be in the format of:
 #
 #     postgresql://USER:PASSWORD@<IP_OF_POSTGRE_SQL_SERVER>/postgres
 #
@@ -51,14 +51,14 @@ engine = create_engine(DATABASEURI)
 #
 # after these statements run, you should see a file test.db in your webserver/ directory
 # this is a sqlite database that you can query like psql typing in the shell command line:
-# 
+#
 #     sqlite3 test.db
 #
 # The following sqlite3 commands may be useful:
-# 
+#
 #     .tables               -- will list the tables in the database
 #     .schema <tablename>   -- print CREATE TABLE statement for table
-# 
+#
 # The setup code should be deleted once you switch to using the Part 2 postgresql database
 #
 #engine.execute("""DROP TABLE IF EXISTS test;""")
@@ -76,7 +76,7 @@ engine = create_engine(DATABASEURI)
 @app.before_request
 def before_request():
   """
-  This function is run at the beginning of every web request 
+  This function is run at the beginning of every web request
   (every time you enter an address in the web browser).
   We use it to setup a database connection that can be used throughout the request
 
@@ -110,7 +110,7 @@ def teardown_request(exception):
 #       @app.route("/foobar/", methods=["POST", "GET"])
 #
 # PROTIP: (the trailing / in the path is important)
-# 
+#
 # see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
@@ -165,15 +165,18 @@ def changepassword():
   email = request.form['email']
   old_pass = request.form['oldpassword']
   new_pass = request.form['newpassword']
-  cmd1 = "SELECT password FROM users WHERE email=\'" + email + "\'"
-  pass_db = g.conn.execute(cmd1)
+#  cmd1 = "SELECT password FROM users WHERE email=\'" + email + "\'"
+#  pass_db = g.conn.execute(cmd1)
+  cursor = g.conn.execute('SELECT password FROM users WHERE email= %s', email)
+  pass_db = str(cursor.fetchone()['password'])
+  cursor.close()
   if(old_pass == pass_db):
 	#cmd2 = 'UPDATE users SET password = (:newpass) WHERE email=(:email1)'
-	cmd2 = 'UPDATE users SET password =\'' + new_pass + '\' WHERE email=\'' + email + '\''  
-	#g.conn.execute(text(cmd), newpass = new_pass, email1 = email)
-	g.conn.execute(cmd2)  	
+	#cmd2 = 'UPDATE users SET password =\'' + new_pass + '\' WHERE email=\'' + email + '\''
+	g.conn.execute('UPDATE users SET password = %s WHERE email= %s',new_pass, email)
+	#g.conn.execute(cmd2)
 	return redirect('/profile')
-  error = 'Invalid Credentials' 
+  error = 'Invalid Credentials'
   return redirect('/profile')
 
 

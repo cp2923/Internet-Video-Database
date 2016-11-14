@@ -165,20 +165,25 @@ def changepassword():
   email = request.form['email']
   old_pass = request.form['oldpassword']
   new_pass = request.form['newpassword']
-#  cmd1 = "SELECT password FROM users WHERE email=\'" + email + "\'"
-#  pass_db = g.conn.execute(cmd1)
   cursor = g.conn.execute('SELECT password FROM users WHERE email= %s', email)
-  pass_db = str(cursor.fetchone()['password'])
+  pass_db = str(cursor.fetchone()['password']) ## '123456' will be stored as u'123456' without str()
   cursor.close()
   if(old_pass == pass_db):
-	#cmd2 = 'UPDATE users SET password = (:newpass) WHERE email=(:email1)'
-	#cmd2 = 'UPDATE users SET password =\'' + new_pass + '\' WHERE email=\'' + email + '\''
 	g.conn.execute('UPDATE users SET password = %s WHERE email= %s',new_pass, email)
-	#g.conn.execute(cmd2)
 	return redirect('/profile')
   error = 'Invalid Credentials'
   return redirect('/profile')
 
+@app.route('/towatch')
+def towatch():
+  email = request.form['email']
+  cursor = conn.execute('SELECT name FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
+  names = []
+  for result in cursor:
+    names.append(result)
+  cursor.close()
+  context = dict(data = names)
+  return render_template("towatch.html", **context)
 
 # Example of adding new data to the database
 @app.route('/register', methods=['POST'])

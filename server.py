@@ -18,6 +18,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
+from sqlalchemy.exc import IntegrityError, DataError
 from flask import Flask, request, render_template, g, redirect, Response
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
@@ -122,14 +123,14 @@ class User(UserMixin):
     pass
 
 def checkdb(email, password):
-    cmd = "SELECT * from users where email = :email and password = :password;"
-    cursor = g.conn.execute(text(cmd), email=email, password=password)
+    cursor = g.conn.execute('SELECT * from users where LOWER(email) = LOWER(%s) and password = %s',email, password)
     res = cursor.fetchone()
     cursor.close()
     if res == None:
         return False
     else:
         return True
+
 
 @login_manager.user_loader
 def user_loader(email):
@@ -175,7 +176,6 @@ def index():
 def login():
     if request.method == 'GET':
         return render_template("index.html")
-    print "@login"
     email = request.form['email']
     password = request.form['password']
     if checkdb(email, password):
@@ -184,8 +184,7 @@ def login():
         login_user(user)
         return 'Successful login'
     else:
-        return render_template("wrongpw.html")
-
+        return render_template("wrong.html")
 
 @app.route('/videos')
 @login_required
@@ -210,7 +209,7 @@ def profile():
 @login_required
 def changepassword():
 #  error = None
-  email = request.form['email']
+  email = current_user.id
   old_pass = request.form['oldpassword']
   new_pass = request.form['newpassword']
   cursor = g.conn.execute('SELECT password FROM users WHERE email= %s', email)
@@ -220,7 +219,7 @@ def changepassword():
 	g.conn.execute('UPDATE users SET password = %s WHERE email= %s',new_pass, email)
 	return redirect('/profile')
 #  error = 'Invalid Credentials'
-  return  render_template("wrongpw.html")
+  return  render_template("wrong.html")
 
 @app.route('/towatch', methods=['GET','POST'])
 def towatch():
@@ -232,31 +231,34 @@ def towatch():
   for result in cursor:
     names.append(result)  # can also be accessed using result[0]
   cursor.close()
-  context = dict(cc = names)
+  context = dict(data = names)
   return render_template("towatch.html", **context)
 
 @app.route('/watched', methods=['GET','POST'])
 def watched():
   email = current_user.id
   cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wl  WHERE email =  %s)', email)
-
-  #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
   names = []
   for result in cursor:
     names.append(result)  # can also be accessed using result[0]
   cursor.close()
   context = dict(data = names)
-  return render_template("towatch.html", **context)
+  return render_template("watched.html", **context)
 
 # Example of adding new data to the database
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['GET','POST'])
 def register():
-  #name = request.form['name']
-  #print name
-  #cmd = 'INSERT INTO users(email) VALUES (:email1)';
-  #g.conn.execute(text(cmd), email1 = name);
-  return redirect('/')
-
+    if request.method == 'GET':
+        return render_template("index.html")
+    email = request.form['email']
+    password = request.form['password']
+    dob = request.form['dob']
+    name = request.form['name']
+    try:
+        g.conn.execute('INSERT INTO users (email, password, name, dob) VALUES (%s,%s,%s,%s)',email, password, name, dob)
+        return 'Successful registered'
+    except (IntegrityError, DataError):
+        return render_template("wrong.html")
 
 if __name__ == "__main__":
   import click

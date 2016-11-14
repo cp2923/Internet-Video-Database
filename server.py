@@ -220,23 +220,11 @@ def changepassword():
 	g.conn.execute('UPDATE users SET password = %s WHERE email= %s',new_pass, email)
 	return redirect('/profile')
 #  error = 'Invalid Credentials'
-  return  render_template("wrongpw.html")
+  return  redirect('profile')
 
 @app.route('/towatch', methods=['GET','POST'])
+@login_required
 def towatch():
-  email = current_user.id
-  cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
-
-  #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
-  names = []
-  for result in cursor:
-    names.append(result)  # can also be accessed using result[0]
-  cursor.close()
-  context = dict(cc = names)
-  return render_template("towatch.html", **context)
-
-@app.route('/watched', methods=['GET','POST'])
-def watched():
   email = current_user.id
   cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wl  WHERE email =  %s)', email)
 
@@ -247,6 +235,61 @@ def watched():
   cursor.close()
   context = dict(data = names)
   return render_template("towatch.html", **context)
+
+@app.route('/watched', methods=['GET','POST'])
+@login_required
+def watched():
+  email = current_user.id
+  cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
+
+  #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("watched.html", **context)
+
+@app.route('/removewatched', methods=['POST'])
+@login_required
+def removewatched():
+  email = current_user.id
+  r_list = request.form.getlist('remove')
+  for r in r_list:
+    g.conn.execute('DELETE FROM wd WHERE vid = %s AND email = %s', (r,email))
+  return redirect('watched')
+
+@app.route('/removetowatch', methods=['POST'])
+@login_required
+def removetowatch():
+  email = current_user.id
+  r_list = request.form.getlist('remove')
+  for r in r_list:
+    g.conn.execute('DELETE FROM wl WHERE vid = %s AND email = %s', (r,email))
+  return redirect('towatch')
+
+@app.route('/myreviews')
+@login_required
+def myreviews():
+  email = current_user.id
+  cursor = g.conn.execute('SELECT * FROM reviews as r,videos as v WHERE r.vid=v.vid AND r.email =  %s', email)
+
+  #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("myreviews.html", **context)
+
+@app.route('/removereviews', methods=['POST'])
+@login_required
+def removereviews():
+  email = current_user.id
+  r_list = request.form.getlist('remove')
+  for r in r_list:
+    g.conn.execute('DELETE FROM reviews WHERE vid = %s AND email = %s', (r,email))
+  return redirect('myreviews')
 
 # Example of adding new data to the database
 @app.route('/register', methods=['POST'])

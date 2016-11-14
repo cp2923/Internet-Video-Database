@@ -1,0 +1,26 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>My Reviews</h1>
+<form method="POST" action="/removereviews">
+<div>
+  {% for n in data %}
+  <p><div style="font-size: 25pt">{{n.name}}  <input type="checkbox" name="remove" value={{n.vid}}></div><div>{{n.dor}}</div></p>
+  <div>{{n.rating}}</div>
+  <div>{{n.content}}</div>
+  {% endfor %}
+  <div><input type="submit" value="Remove Selected"></div>
+</div>
+</form>
+
+</body>
+
+
+</html>

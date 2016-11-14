@@ -224,15 +224,28 @@ def changepassword():
 
 @app.route('/towatch', methods=['GET','POST'])
 def towatch():
-  #email = request.form['email']
-  #cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
+  email = current_user.id
+  cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
 
-  cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
+  #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
   names = []
   for result in cursor:
     names.append(result)  # can also be accessed using result[0]
   cursor.close()
   context = dict(cc = names)
+  return render_template("towatch.html", **context)
+
+@app.route('/watched', methods=['GET','POST'])
+def watched():
+  email = current_user.id
+  cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wl  WHERE email =  %s)', email)
+
+  #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
   return render_template("towatch.html", **context)
 
 # Example of adding new data to the database

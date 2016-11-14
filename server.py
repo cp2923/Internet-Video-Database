@@ -118,11 +118,14 @@ def teardown_request(exception):
 # see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
+class User(UserMixin):
+    pass
 
 def checkdb(email, password):
     cmd = "SELECT * from users where email = :email and password = :password;"
     cursor = g.conn.execute(text(cmd), email=email, password=password)
     res = cursor.fetchone()
+    cursor.close()
     if res == None:
         return False
     else:
@@ -130,14 +133,20 @@ def checkdb(email, password):
 
 @login_manager.user_loader
 def user_loader(email):
-    if email not in user_database:
+    cursor = g.conn.execute('SELECT * FROM users WHERE email= %s', email)
+    res = cursor.fetchone()
+    cursor.close()
+    if res == None:
         return
 
-    print '@user_loader'
     user = User()
     user.id = email
     return user
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return 'Logged out'
 
 @app.route('/')
 def index():
@@ -165,26 +174,21 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return '''
-               <form action='login' method='POST'>
-                <input type='text' name='email' id='email' placeholder='email'></input>
-                <input type='password' name='pw' id='pw' placeholder='password'></input>
-                <input type='submit' name='submit'></input>
-               </form>
-               '''
+        return render_template("index.html")
     print "@login"
     email = request.form['email']
-    password = request.form['pw']
+    password = request.form['password']
     if checkdb(email, password):
         user = User()
         user.id = email
         login_user(user)
         return 'Successful login'
-
-    return 'Bad login'
+    else:
+        return render_template("wrongpw.html")
 
 
 @app.route('/videos')
+@login_required
 def videos():
   cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
   names = []

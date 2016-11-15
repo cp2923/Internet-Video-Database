@@ -147,7 +147,7 @@ def user_loader(email):
 @app.route('/logout')
 def logout():
     logout_user()
-    return 'Logged out'
+    return render_template("index.html")
 
 @app.route('/')
 def index():
@@ -182,7 +182,7 @@ def login():
         user = User()
         user.id = email
         login_user(user)
-        return 'Successful login'
+        return render_template("/videos")
     else:
         return render_template("wrong.html")
 
@@ -224,7 +224,7 @@ def changepassword():
 @app.route('/towatch', methods=['GET','POST'])
 def towatch():
   email = current_user.id
-  cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
+  cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wl  WHERE email =  %s)', email)
 
   #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
   names = []
@@ -237,7 +237,7 @@ def towatch():
 @app.route('/watched', methods=['GET','POST'])
 def watched():
   email = current_user.id
-  cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wl  WHERE email =  %s)', email)
+  cursor = g.conn.execute('SELECT * FROM videos WHERE vid in (SELECT vid FROM wd  WHERE email =  %s)', email)
   names = []
   for result in cursor:
     names.append(result)  # can also be accessed using result[0]

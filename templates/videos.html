@@ -1,6 +1,6 @@
 <html>
   <style>
-    body{ 
+    body{
       font-size: 15pt;
       font-family: arial;
     }
@@ -16,7 +16,7 @@
     <div>{{n.dou}}</div>
     <div>views : {{n.nov}}</div>
     <div>likes : {{n.nol}}</div>
-    <div>Dislikes : {{n.nod}}</div>		
+    <div>Dislikes : {{n.nod}}</div>
     {% endfor %}
   </div>
 
@@ -24,6 +24,10 @@
 
 <form method="POST" action="/add">
 <p>Name of new computer scientist: <input type="text" name="name"> <input type="submit" value="Add"></p>
+</form>
+</form>
+<form method="get" action="/logout">
+    <button type="submit">Logout</button>
 </form>
 
 </body>

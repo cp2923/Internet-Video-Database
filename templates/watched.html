@@ -8,21 +8,27 @@
 
 
 <body>
-  <h1>Video you watched</h1>
+  <h1>Watched Videos</h1>
+<form method="POST" action="/removewatched">
 <div>
   {% for n in data %}
-  <p><div style="font-size: 25pt">{{n.name}}</div><div>{{n.genre}}</div></p>
+  <p><div style="font-size: 25pt">{{n.name}}  <input type="checkbox" name="remove" value={{n.vid}}></div><div>{{n.genre}}</div></p>
   <div>{{n.dou}}</div>
   <div>views : {{n.nov}}</div>
   <div>likes : {{n.nol}}</div>
   <div>Dislikes : {{n.nod}}</div>
   {% endfor %}
+
+  <div><input type="submit" value="Remove Selected"></div>
+
+
 </div>
 </form>
-</form>
+
 <form method="get" action="/logout">
     <button type="submit">Logout</button>
 </form>
+
 </body>
 
 

@@ -19,7 +19,7 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from sqlalchemy.exc import IntegrityError, DataError
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response, url_for
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -183,13 +183,13 @@ def login():
         user = User()
         user.id = uid
         login_user(user)
-        return redirect("/videos")
+        return redirect("/profile")
     else:
         return render_template("wrong.html")
 
 @app.route('/videos')
 def videos():
-  cursor = g.conn.execute("SELECT * FROM videos as v,reviews as r WHERE v.vid=r.vid ORDER BY dou DESC")
+  cursor = g.conn.execute("SELECT v.name, round(avg(r.rating),1), v.nov, v.nol, v.nod, v.vid, v.genre FROM videos as v LEFT JOIN reviews as r ON v.vid=r.vid GROUP BY v.vid, v.dou, v.nov, v.nol, v.nod, v.vid, v.genre ORDER BY v.dou DESC")
   names = []
   for result in cursor:
     names.append(result)  # can also be accessed using result[0]
@@ -199,7 +199,7 @@ def videos():
 
 @app.route('/top',methods=['GET', 'POST'])
 def top():
-  cursor = g.conn.execute("SELECT * FROM videos as v,reviews as r WHERE v.vid=r.vid ORDER BY rating DESC")
+  cursor = g.conn.execute("SELECT v.name, round(avg(r.rating),1), v.nov, v.nol, v.nod, v.vid, v.genre FROM videos as v,reviews as r WHERE v.vid=r.vid GROUP BY v.vid, v.dou, v.nov, v.nol, v.nod, v.vid, v.genre ORDER BY avg(r.rating) DESC LIMIT 5 ")
   names = []
   for result in cursor:
     names.append(result)  # can also be accessed using result[0]
@@ -292,23 +292,21 @@ def removetowatch():
     g.conn.execute('DELETE FROM wl WHERE vid = %s AND email = %s', (r,email))
   return redirect('towatch')
 
-@app.route('/addtowatch', methods=['POST'])
-@login_required
-def addtowatch():
-  email = current_user.id
-  r_list = request.form.getlist('add')
-  for r in r_list:
-    g.conn.execute('INSERT INTO wl (email, vid) VALUES (%s, %s)',email,r)
-  return redirect('towatch')
-
+@app.route('/playlists')
+def playlists():
+  cursor = g.conn.execute("SELECT * FROM playlist as p,users as u WHERE p.email = u.email")
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("playlists.html", **context)
 
 @app.route('/playlist', methods=['GET','POST'])
-@login_required
 def playlist():
-  email = current_user.id
-  cursor = g.conn.execute('SELECT vid FROM playlist  WHERE email =  %s', email)
+  pid = int(request.args.get('playlistID'))
+  cursor = g.conn.execute('SELECT * FROM videos as v,vbp WHERE v.vid = vbp.vid AND pid =  %s', pid)
 
-  #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
   names = []
   for result in cursor:
     names.append(result)  # can also be accessed using result[0]
@@ -316,15 +314,97 @@ def playlist():
   context = dict(data = names)
   return render_template("playlist.html", **context)
 
+@app.route('/addwatch', methods=['POST'])
+@login_required
+def addwatch():
+    email = current_user.id
+    r_list = request.form.getlist('add')
+    if "Add to Watchlist" in request.form.get('action'):
+        for r in r_list:
+            try:
+                g.conn.execute('INSERT INTO wl (email, vid) VALUES (%s, %s)',email,r)
+            except (IntegrityError, DataError):
+                pass
+            return redirect('/towatch')
+    elif 'Add to Watched' in request.form.get('action'):
+        for r in r_list:
+            try:
+                g.conn.execute('INSERT INTO wd (email, vid) VALUES (%s, %s)',email,r)
+            except (IntegrityError, DataError):
+                pass
+        return redirect('/watched')
+    else:
+        try:
+            plname = request.form.get('action')
+            if plname == '':
+                return redirect('/videos')
+            else:
+                cursor = g.conn.execute('SELECT pid FROM playlist WHERE name = %s AND email =  %s', plname, email)
+                result = cursor.fetchone()
+                cursor.close()
+                if result == None:
+                    cursor = g.conn.execute('SELECT pid FROM playlist ORDER BY pid DESC')
+                    pid = int(cursor.fetchone().values()[0]) + 1
+                    print(pid)
+                    cursor.close()
+                    g.conn.execute('INSERT INTO playlist (pid, name, email) VALUES (%s, %s, %s)', pid, plname, email)
+                cursor = g.conn.execute('SELECT pid FROM playlist WHERE name = %s AND email =  %s', plname, email)
+                for result in cursor:
+                    pid = result.values()[0]
+                    for r in r_list:
+                        try:
+                            g.conn.execute('INSERT INTO vbp (vid, pid) VALUES (%s, %s)',str(r),result.values()[0])
+                        except (IntegrityError, DataError):
+                            pass
+                cursor.close()
+                return redirect(url_for('myplaylist', playlistID = pid))
+        except(ValueError):
+            pass
+
+
+@app.route('/myplaylists', methods=['GET','POST'])
+@login_required
+def myplaylists():
+  email = current_user.id
+  cursor = g.conn.execute('SELECT * FROM playlist WHERE email =  %s', email)
+
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("myplaylists.html", **context)
+
+@app.route('/removeplaylists', methods=['POST'])
+@login_required
+def removeplaylists():
+  r_list = request.form.getlist('remove')
+  for r in r_list:
+    g.conn.execute('DELETE FROM playlist WHERE pid = %s', r)
+  return redirect('myplaylists')
+
+@app.route('/myplaylist', methods=['GET','POST'])
+@login_required
+def myplaylist():
+  pid = int(request.args.get('playlistID'))
+  cursor = g.conn.execute('SELECT * FROM videos as v,vbp WHERE v.vid = vbp.vid AND pid =  %s', pid)
+
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("myplaylist.html", **context)
+
+
 @app.route('/removeplaylist', methods=['POST'])
 @login_required
 def removeplaylist():
-  email = current_user.id
+  pid = int(request.form.get('playlistID'))
   r_list = request.form.getlist('remove')
   for r in r_list:
-    g.conn.execute('DELETE FROM playlist WHERE pid = %s AND email = %s', (r,email))
-  return redirect('towatch')
-
+    g.conn.execute('DELETE FROM vbp WHERE pid = %s AND vid = %s', (pid,r))
+  return redirect(url_for('myplaylist', playlistID = pid))
 
 @app.route('/myreviews')
 @login_required

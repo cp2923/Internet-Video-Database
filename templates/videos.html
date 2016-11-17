@@ -8,22 +8,26 @@
 
 
 <body>
-  <h1>Videos List</h1>
+  <a href="/videos"><h1>Videos</h1></a>
+  <a href="/playlists"><h1>Playlists</h1></a>
 <form method="POST" action="/top">
   <button type="submit">Top Videos</button>
     </form>
-<form method="POST" action="/addtowatch">
+
+<form method="POST" action ="/addwatch">
   <div>
     {% for n in data %}
-    <p><div><format style="font-size: 25pt"><a href="{{url_for('video',videoID=n.vid)}}">{{n.name}}</a><input type="checkbox" name="add" value={{n.vid}}></format><format style="color: goldenrod">{{n.rating}}/10</format></div><div>{{n.genre}}</div></p>
+    <p><div><format style="font-size: 25pt"><a href="{{url_for('video',videoID=n.vid)}}">{{n.name}}</a><input type="checkbox" name = "add" value={{n.vid}}></format><format style="color: goldenrod">{{n.round}}/10</format></div><div>{{n.genre}}</div></p>
     <div>{{n.dou}}</div>
-    <div>views : {{n.nov}}</div>
-    <div>likes : {{n.nol}}</div>
+    <div>Views : {{n.nov}}</div>
+    <div>Likes : {{n.nol}}</div>
     <div>Dislikes : {{n.nod}}</div>
     {% endfor %}
-    <div><input type="submit" value="add towatch"></div>
+    <div><input type="submit" name = 'action' value="Add to Watchlist">
+    <input type="submit"  name = 'action' value="Add to Watched"></div>
+    <div><input type="text" name = 'action' placeholder="playlist name"><input type="submit"   value="Add to Playlist"></div></div>
   </div>
-
+</form>
 <p><a href="/profile">Go to the profile page</a></p>
 
 

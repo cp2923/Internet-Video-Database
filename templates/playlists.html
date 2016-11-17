@@ -1,0 +1,33 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  </p>
+  <a href="/videos"><h1>Videos</h1></a>
+  <a href="/playlists"><h1>Playlists</h1></a>  
+  </p>
+  <div>
+    {% for n in data %}
+    <p><div><format style="font-size: 25pt"><a href="{{url_for('playlist',playlistID=n.pid)}}">{{n[1]}}</a></format></div><div>{{n[5]}}</div></p>
+
+    {% endfor %}
+  </div>
+
+<p><a href="/profile">Go to the profile page</a></p>
+
+
+
+<!-- <form method="get" action="/logout"> -->
+    <button type="submit">Logout</button>
+</form>
+
+</body>
+
+
+</html>

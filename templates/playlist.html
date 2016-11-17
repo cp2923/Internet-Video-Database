@@ -8,24 +8,30 @@
 
 
 <body>
-  <h1>Playlist</h1>
-<form method="POST" action="/removeplaylist">
+
+
+    {% if data[0] %}
+
 <div>
+
   {% for n in data %}
-  <p><div style="font-size: 25pt">{{n.name}}  <input type="checkbox" name="remove" value={{n.vid}}></div><div>{{n.genre}}</div></p>
-  <div>{{n.dou}}</div>
-  <div>views : {{n.nov}}</div>
-  <div>likes : {{n.nol}}</div>
-  <div>Dislikes : {{n.nod}}</div>
+  <p><div style="font-size: 25pt"><a href="{{url_for('video',videoID=n.vid)}}">{{n.name}}</a> </div></p>
   {% endfor %}
-  <div><input type="submit" value="Remove Selected"></div>
+
 </div>
-</form>
-<form method="get" action="/logout">
+
+{% else %}
+    <div>No Videos</div>
+    {% endif %}
+
+<!-- <form method="get" action="/logout"> -->
     <button type="submit">Logout</button>
 </form>
 
 </body>
+
+<p><a href="/profile">Go to the profile page</a></p>
+
 
 
 </html>

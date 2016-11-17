@@ -1,0 +1,37 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+
+
+    {% if data[0] %}
+<form method="POST" action="/removeplaylist">
+<div>
+  <input type="hidden" name="playlistID" value={{data[0].pid}}>
+  {% for n in data %}
+  <p><div style="font-size: 25pt"><a href="{{url_for('video',videoID=n.vid)}}">{{n.name}}</a>  <input type="checkbox" name="remove" value={{n.vid}}></div></p>
+  {% endfor %}
+  <div><input type="submit" value="Remove Selected"></div>
+</div>
+</form>
+{% else %}
+    <div>No Videos</div>
+    {% endif %}
+
+<form method="get" action="/logout">
+    <button type="submit">Logout</button>
+</form>
+
+</body>
+
+<p><a href="/profile">Go to the profile page</a></p>
+
+
+
+</html>

@@ -9,22 +9,25 @@
 
 <body>
   <h1>Videos List</h1>
-
+<form method="POST" action="/top">
+  <button type="submit">Top Videos</button>
+    </form>
+<form method="POST" action="/addtowatch">
   <div>
     {% for n in data %}
-    <p><div><format style="font-size: 25pt">{{n.name}}</format><format style="color: goldenrod">{{n.rating}}/10</format></div><div>{{n.genre}}</div></p>
+    <p><div><format style="font-size: 25pt"><a href="{{url_for('video',videoID=n.vid)}}">{{n.name}}</a><input type="checkbox" name="add" value={{n.vid}}></format><format style="color: goldenrod">{{n.rating}}/10</format></div><div>{{n.genre}}</div></p>
     <div>{{n.dou}}</div>
     <div>views : {{n.nov}}</div>
     <div>likes : {{n.nol}}</div>
     <div>Dislikes : {{n.nod}}</div>
     {% endfor %}
+    <div><input type="submit" value="add towatch"></div>
   </div>
 
 <p><a href="/profile">Go to the profile page</a></p>
 
-<form method="POST" action="/add">
-<p>Name of new computer scientist: <input type="text" name="name"> <input type="submit" value="Add"></p>
-</form>
+
+
 <form method="get" action="/logout">
     <button type="submit">Logout</button>
 </form>

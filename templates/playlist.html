@@ -1,0 +1,31 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>Playlist</h1>
+<form method="POST" action="/removeplaylist">
+<div>
+  {% for n in data %}
+  <p><div style="font-size: 25pt">{{n.name}}  <input type="checkbox" name="remove" value={{n.vid}}></div><div>{{n.genre}}</div></p>
+  <div>{{n.dou}}</div>
+  <div>views : {{n.nov}}</div>
+  <div>likes : {{n.nol}}</div>
+  <div>Dislikes : {{n.nod}}</div>
+  {% endfor %}
+  <div><input type="submit" value="Remove Selected"></div>
+</div>
+</form>
+<form method="get" action="/logout">
+    <button type="submit">Logout</button>
+</form>
+
+</body>
+
+
+</html>

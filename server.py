@@ -129,7 +129,7 @@ def checkdb(email, password):
     if res == None:
         return False
     else:
-        return True
+        return str(res['email'])
 
 
 @login_manager.user_loader
@@ -178,16 +178,16 @@ def login():
         return render_template("index.html")
     email = request.form['email']
     password = request.form['password']
-    if checkdb(email, password):
+    uid = checkdb(email, password)
+    if uid:
         user = User()
-        user.id = email
+        user.id = uid
         login_user(user)
         return redirect("/videos")
     else:
         return render_template("wrong.html")
 
 @app.route('/videos')
-@login_required
 def videos():
   cursor = g.conn.execute("SELECT * FROM videos as v,reviews as r WHERE v.vid=r.vid ORDER BY dou DESC")
   names = []
@@ -196,6 +196,27 @@ def videos():
   cursor.close()
   context = dict(data = names)
   return render_template("videos.html", **context)
+
+@app.route('/top',methods=['GET', 'POST'])
+def top():
+  cursor = g.conn.execute("SELECT * FROM videos as v,reviews as r WHERE v.vid=r.vid ORDER BY rating DESC")
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("videos.html", **context)
+
+@app.route('/video', methods=['GET'])
+def video():
+  vid = int(request.args.get('videoID'))
+  cursor = g.conn.execute("SELECT * FROM users as u, videos as v, reviews as r WHERE v.vid=r.vid AND v.vid= %s AND u.email=r.email ORDER BY dor DESC", vid)
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("video.html", **context)
 
 
 @app.route('/profile')
@@ -270,6 +291,40 @@ def removetowatch():
   for r in r_list:
     g.conn.execute('DELETE FROM wl WHERE vid = %s AND email = %s', (r,email))
   return redirect('towatch')
+
+@app.route('/addtowatch', methods=['POST'])
+@login_required
+def addtowatch():
+  email = current_user.id
+  r_list = request.form.getlist('add')
+  for r in r_list:
+    g.conn.execute('INSERT INTO wl (email, vid) VALUES (%s, %s)',email,r)
+  return redirect('towatch')
+
+
+@app.route('/playlist', methods=['GET','POST'])
+@login_required
+def playlist():
+  email = current_user.id
+  cursor = g.conn.execute('SELECT vid FROM playlist  WHERE email =  %s', email)
+
+  #cursor = g.conn.execute("SELECT * FROM videos ORDER BY dou DESC")
+  names = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = names)
+  return render_template("playlist.html", **context)
+
+@app.route('/removeplaylist', methods=['POST'])
+@login_required
+def removeplaylist():
+  email = current_user.id
+  r_list = request.form.getlist('remove')
+  for r in r_list:
+    g.conn.execute('DELETE FROM playlist WHERE pid = %s AND email = %s', (r,email))
+  return redirect('towatch')
+
 
 @app.route('/myreviews')
 @login_required

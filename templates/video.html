@@ -1,0 +1,32 @@
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+
+  <div>
+    <p><div><format style="font-size: 25pt">{{data[0].name}}</format></div><div>{{data[0].genre}}</div></p>
+    <div>{{data[0].dou}}</div>
+    <div>views : {{data[0].nov}}</div>
+    <div>likes : {{data[0].nol}}</div>
+    {% for n in data %}
+    <p>
+    <div><format style="color: goldenrod">{{n.rating}}/10</format></div>
+    <div>{{n[2]}}</div>
+    <div>{{n.dor}}</div>
+    <div>{{n.content}}</div
+    </p>
+    {% endfor %}
+  </div>
+
+<p><a href="/profile">Go to the profile page</a></p>
+
+</body>
+
+
+</html>

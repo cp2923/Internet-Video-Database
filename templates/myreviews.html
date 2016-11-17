@@ -1,13 +1,11 @@
-<html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
-
-
-<body>
+{% extends "base.html" %}
+{% block content %}
+<li class="active"><a href="/myreviews">My Reviews</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+<div class="container"> 
   <h1>My Reviews</h1>
 <form method="POST" action="/removereviews">
 <div>
@@ -20,7 +18,5 @@
 </div>
 </form>
 
-</body>
-
-
-</html>
+</div>
+{% endblock %}

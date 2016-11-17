@@ -1,13 +1,11 @@
-<html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
-
-
-<body>
+{% extends "base.html" %}
+{% block content %}
+<li class="active"><a href="/playlists">Playlists</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+<div class="container">  
   </p>
   <a href="/videos"><h1>Videos</h1></a>
   <a href="/playlists"><h1>Playlists</h1></a>  
@@ -27,7 +25,5 @@
     <button type="submit">Logout</button>
 </form>
 
-</body>
-
-
-</html>
+</div>
+{% endblock %}

@@ -1,13 +1,11 @@
-<html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
-
-
-<body>
+{% extends "base.html" %}
+{% block content %}
+<li class="active"><a href="/towatch">To Watch</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+<div class="container">  
   <h1>To Watch</h1>
 <form method="POST" action="/removetowatch">
 <div>
@@ -25,7 +23,5 @@
     <button type="submit">Logout</button>
 </form>
 
-</body>
-
-
-</html>
+</div>
+{% endblock %}

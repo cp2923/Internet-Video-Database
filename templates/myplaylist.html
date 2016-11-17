@@ -1,13 +1,11 @@
-<html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
-
-
-<body>
+{% extends "base.html" %}
+{% block content %}
+<li class="active"><a href="/myplaylist">My Playlist</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+<div class="container"> 
 
 
     {% if data[0] %}
@@ -28,10 +26,7 @@
     <button type="submit">Logout</button>
 </form>
 
-</body>
-
 <p><a href="/profile">Go to the profile page</a></p>
 
-
-
-</html>
+</div>
+{% endblock %}

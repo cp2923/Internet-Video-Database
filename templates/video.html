@@ -1,13 +1,13 @@
-<html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
-
-
-<body>
+{% extends "base.html" %}
+{% block content %}
+{% if data[0] %}
+<li class="active"><a href="/video">{{data[0].name}}</a></li>
+{% endif %}
+        </ul>
+      </div>
+    </div>
+    <hr>
+<div class="container">  
 
   <div>
 {% if data[0] %}
@@ -32,7 +32,5 @@
 
 <p><a href="/profile">Go to the profile page</a></p>
 
-</body>
-
-
-</html>
+</div>
+{% endblock %}

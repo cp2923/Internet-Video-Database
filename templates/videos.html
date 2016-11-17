@@ -1,13 +1,11 @@
-<html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
-
-
-<body>
+{% extends "base.html" %}
+{% block content %}
+<li class="active"><a href="/videos">Videos</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+<div class="container">  
   <a href="/videos"><h1>Videos</h1></a>
   <a href="/playlists"><h1>Playlists</h1></a>
 <form method="POST" action="/top">
@@ -17,11 +15,14 @@
 <form method="POST" action ="/addwatch">
   <div>
     {% for n in data %}
-    <p><div><format style="font-size: 25pt"><a href="{{url_for('video',videoID=n.vid)}}">{{n.name}}</a><input type="checkbox" name = "add" value={{n.vid}}></format><format style="color: goldenrod">{{n.round}}/10</format></div><div>{{n.genre}}</div></p>
+    <p>
+    <p><div><format style="font-size: 20pt"><a href="{{url_for('video',videoID=n.vid)}}">{{n.name}}</a><input type="checkbox" name = "add" value={{n.vid}}></format><format style="color: goldenrod">{{n.round}}/10</format></div><div>{{n.genre}}</div></p>
     <div>{{n.dou}}</div>
     <div>Views : {{n.nov}}</div>
     <div>Likes : {{n.nol}}</div>
     <div>Dislikes : {{n.nod}}</div>
+    </p>
+    <hr>
     {% endfor %}
     <div><input type="submit" name = 'action' value="Add to Watchlist">
     <input type="submit"  name = 'action' value="Add to Watched"></div>
@@ -36,7 +37,5 @@
     <button type="submit">Logout</button>
 </form>
 
-</body>
-
-
-</html>
+</div>
+{% endblock %}

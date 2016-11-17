@@ -22,6 +22,7 @@ from sqlalchemy.exc import IntegrityError, DataError
 from flask import Flask, request, render_template, g, redirect, Response, url_for
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
+
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 
@@ -236,14 +237,16 @@ def changepassword():
   email = current_user.id
   old_pass = request.form['oldpassword']
   new_pass = request.form['newpassword']
-  cursor = g.conn.execute('SELECT password FROM users WHERE email= %s', email)
-  pass_db = str(cursor.fetchone()['password']) ## '123456' will be stored as u'123456' without str()
+  cursor = g.conn.execute('SELECT * FROM users WHERE email= %s', email)
+  result = cursor.fetchone()
   cursor.close()
+  pass_db = str(result['password']) ## '123456' will be stored as u'123456' without str()
+  context = dict(data=result)
   if(old_pass == pass_db):
 	g.conn.execute('UPDATE users SET password = %s WHERE email= %s',new_pass, email)
 	return redirect('/profile')
 #  error = 'Invalid Credentials'
-  return  render_template("wrong.html")
+  return  render_template("wrongpw.html", **context)
 
 @app.route('/towatch', methods=['GET','POST'])
 @login_required

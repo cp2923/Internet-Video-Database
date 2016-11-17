@@ -1,18 +1,32 @@
-<html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
+{% extends "base.html" %}
+{% block content %}
+<li><a href="/">Home</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+<div class="container">  
+<h1>Welcome</h1>
+<h2>Login</h2>
+<form method="POST" action="/login">
+<p><label>emailID:</label> <input type="text" placeholder="Enter your email" name="email"></p>
+<p><label>Password: </label><input type="password" placeholder="Enter your password" name="password"></p>
+<p>
+<button type="submit" value="Login" class="btn">Login</button>
+	
+    <div class="alert">
+<button type="submit" class="close" data-dismiss="alert">&times;</button>
+      <strong>Warning!</strong> Best check yo self, you're not looking too good.
+    </div></p>
+</form>
+<h2>Register</h2>
+<form method="POST" action="/register">
+<p>name: <input type="text" placeholder="Enter your name" name="name"></p>
+<p>emailID: <input type="email" placeholder="Enter your email" name="email"></p>
+<p>Create Password: <input type="password" placeholder="Enter your password" name="password">
+<p>Date of Birth : <input type="date" name="dob"></p>
+<p><button type="submit" value="Register" class="btn">Register</button></p>
 
-
-<body>
-  <h1>Something goes wrong</h1>
-
-<p><a href="/profile">back to the profile page</a></p>
-
-</body>
-
-
-</html>
+</form>
+</div>
+{% endblock %}

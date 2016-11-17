@@ -328,7 +328,7 @@ def addwatch():
                 g.conn.execute('INSERT INTO wl (email, vid) VALUES (%s, %s)',email,r)
             except (IntegrityError, DataError):
                 pass
-            return redirect('/towatch')
+        return redirect('/towatch')
     elif 'Add to Watched' in request.form.get('action'):
         for r in r_list:
             try:
